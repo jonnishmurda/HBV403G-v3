@@ -37,7 +37,7 @@ async function insertQuestions(data: { title: string; questions: any[] }) {
             continue;
         }
 
-        const createdQuestion = await prisma.Question.create({
+        const createdQuestion = await prisma.question.create({  
             data: {
                 text: question.question,
                 categoryId: category.id,
@@ -50,7 +50,7 @@ async function insertQuestions(data: { title: string; questions: any[] }) {
                 continue;
             }
 
-            await prisma.Answer.create({
+            await prisma.answer.create({  
                 data: {
                     text: answer.answer,
                     correct: answer.correct,
