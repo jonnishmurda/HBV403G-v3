@@ -15,8 +15,18 @@ model Categories {
 }
 
 model Question {
-  id         Int        @id @default(autoincrement())
-  text       String
-  categoryId Int
-  category   Categories @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  id          Int      @id @default(autoincrement())
+  text        String   @db.Text
+  categoryId  Int
+  category    Categories @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  answers     Answer[]
 }
+
+model Answer {
+  id          Int      @id @default(autoincrement())
+  text        String   @db.Text
+  correct     Boolean
+  questionId  Int
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
