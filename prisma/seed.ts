@@ -3,20 +3,19 @@ import fs from 'fs';
 
 const prisma = new PrismaClient();
 
-/**
- * Chat aðstoð við að setja inn spurningarnar í gagnagrunninn!
- */
 async function seedDatabase() {
     try {
-        const jsData = JSON.parse(fs.readFileSync('data/js.json', 'utf-8'));
-        const htmlData = JSON.parse(fs.readFileSync('data/html.json', 'utf-8'));
-        const cssData = JSON.parse(fs.readFileSync('data/css.json', 'utf-8'));
+        const jsData = JSON.parse(fs.readFileSync('prisma/js.json', 'utf-8'));
+        const htmlData = JSON.parse(fs.readFileSync('prisma/html.json', 'utf-8'));
+        const cssData = JSON.parse(fs.readFileSync('prisma/css.json', 'utf-8'));
 
         await insertQuestions(jsData);
         await insertQuestions(htmlData);
         await insertQuestions(cssData);
+
+        console.log("✅ Seeding completed successfully!");
     } catch (error) {
-        console.error("error:", error);
+        console.error("❌ Error seeding database:", error);
     } finally {
         await prisma.$disconnect();
     }
@@ -28,16 +27,17 @@ async function insertQuestions(data: { title: string; questions: any[] }) {
     });
 
     if (!category) {
-        console.error(`Category "${data.title}" not found. Skipping.`);
+        console.error(`❌ Category "${data.title}" not found. Skipping.`);
         return;
     }
 
     for (const question of data.questions) {
         if (!question.question || !question.answers) {
+            console.warn(`⚠️ Skipping invalid question:`, question);
             continue;
         }
 
-        const createdQuestion = await prisma.question.create({
+        const createdQuestion = await prisma.Question.create({
             data: {
                 text: question.question,
                 categoryId: category.id,
@@ -50,7 +50,7 @@ async function insertQuestions(data: { title: string; questions: any[] }) {
                 continue;
             }
 
-            await prisma.answer.create({
+            await prisma.Answer.create({
                 data: {
                     text: answer.answer,
                     correct: answer.correct,
