@@ -7,7 +7,7 @@
     "start": "npm run build && node dist/index.js"
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.8",
