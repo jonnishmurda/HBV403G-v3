@@ -16,23 +16,6 @@ const CategoryToCreateSchema = z.object({
 type Category = z.infer<typeof CategorySchema>;
 type CategoryToCreate = z.infer<typeof CategoryToCreateSchema>;
 
-const mockcategories: Array<Category> = [
-    {
-        id: 1,
-        name: "HTML",
-        slug: "html"
-    },
-    {
-        id: 2,
-        name: "CSS",
-        slug: "css"
-    },
-    {
-        id: 3,
-        name: "JavaScript",
-        slug: "javascript"
-    }
-]
 
 /**
  * 
@@ -50,7 +33,7 @@ export async function getCategories(limit: number, offset: number): Promise<Arra
  * @param slug Nafn flokks
  * @returns Skilar /:slug flokki
  */
-export async function getCategorySlug(slug) {
+export async function getCategorySlug(slug: string) {
     const category = await prisma.categories.findUnique({
         where: { slug }
     });
@@ -74,13 +57,14 @@ export async function createCategory(categoryToCreate: CategoryToCreate): Promis
 }
 
 
-export async function changeCategory(slug, name) {
-    const category = await getCategorySlug(slug);
-    if (!category) return null;
-
-    category.name = name;
-    category.slug = slug.toLowerCase().replace('/\s+/g, "-"');
-    return category;
+export async function changeCategory(slug: string, name: string) {
+    return await prisma.categories.update({
+        where: { slug },
+        data: {
+            name: name,
+            slug: name.toLowerCase().replace(/\s+/g, "-")
+        },
+    });
 }
 
 
@@ -98,7 +82,7 @@ export async function deleteCategory(slug: string): Promise<boolean> {
     }
 
     await prisma.categories.delete({
-        where: { slug }
+        where: { id: category.id }
     });
 
     return true

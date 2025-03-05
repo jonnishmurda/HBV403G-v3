@@ -122,6 +122,22 @@ app.post('/categories/:slug/question', async (c) => {
   }
 })
 
+app.delete('/questions/:id', async (c) => {
+  const { id } = c.req.param();
+  const questionId = Number(id);
+
+  if (isNaN(questionId) || questionId < 1) {
+    return c.json({ error: "Ógilt id spurningu" }, 400);
+  }
+
+  const success = await deleteQuestion(questionId);
+
+  if (!success) {
+    return c.json({ error: "Spurning fannst ekki" }, 404);
+  }
+
+  return c.body(null, 204);
+});
 
 
 serve({
