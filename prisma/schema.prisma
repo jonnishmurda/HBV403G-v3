@@ -14,7 +14,15 @@ datasource db {
 }
 
 model Categories {
-  id Int @id @default(autoincrement())
-  name String @unique
-  slug String @unique
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  slug      String     @unique
+  questions Question[]
+}
+
+model Question {
+  id         Int        @id @default(autoincrement())
+  text       String     @db.Text
+  categoryId Int
+  category   Categories @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 }

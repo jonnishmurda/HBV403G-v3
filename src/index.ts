@@ -1,6 +1,7 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { getCategories, getCategorySlug, createCategory, changeCategory, deleteCategory, validateCategory } from './categories.db.js';
+import { getQuestions, getQuestionsByCategory, deleteQuestion, createQuestion, validateQuestion } from './questions.db.js';
 
 const app = new Hono();
 
@@ -78,6 +79,50 @@ app.delete('/category/:slug', async (c) => {
 
   return c.body(null, 204)
 });
+
+app.get('/questions', async (c) => {
+  const questions = await getQuestions();
+  return c.json(questions);
+})
+
+
+app.get('/categories/:slug/questions', async (c) => {
+  const { slug } = c.req.param();
+  const questions = await getQuestionsByCategory(slug);
+
+  if (questions.length === 0) {
+    return c.json({ error: "Engar spurningar fundust fyrir þennan flokk" }, 404);
+  }
+
+  return c.json(questions)
+})
+
+app.post('/categories/:slug/question', async (c) => {
+  try {
+    const { slug } = c.req.param();
+    const body = await c.req.json();
+
+    const validation = validateQuestion({ ...body, categorySlug: slug });
+
+    if (!validation.success) {
+      return c.json({ error: "Ógild gögn", errors: validation.error.flatten() }, 400);
+    }
+
+
+    const newQuestion = await createQuestion(slug, validation.data.text);
+
+    if (!newQuestion) {
+      return c.json({ error: "Flokkur fannst ekki" }, 404);
+    }
+
+    return c.json(newQuestion, 201);
+  } catch (e) {
+    console.error("Villa kom upp:", e);
+    return c.json({ error: "Villa í gagnagrunni" }, 500);
+  }
+})
+
+
 
 serve({
   fetch: app.fetch,
