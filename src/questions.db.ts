@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
+import xss from 'xss';
 
 const prisma = new PrismaClient();
 
@@ -51,9 +52,11 @@ export async function createQuestion(categorySlug: string, text: string) {
 
     if (!category) return null;
 
+    const sanitizedText = xss(text)
+
     return await prisma.question.create({
         data: {
-            text,
+            text: sanitizedText,
             categoryId: category.id,
         },
     });

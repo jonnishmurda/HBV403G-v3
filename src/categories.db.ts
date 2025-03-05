@@ -1,5 +1,6 @@
 import { z, type TypeOf } from 'zod';
 import { PrismaClient } from '@prisma/client';
+import xss from 'xss';
 
 const prisma = new PrismaClient()
 
@@ -46,10 +47,12 @@ export async function getCategorySlug(slug: string) {
  * @returns Býr til nýjan flokk í /categories
  */
 export async function createCategory(categoryToCreate: CategoryToCreate): Promise<Category> {
+    const sanitizedName = xss(categoryToCreate.name)
+
     const createdCategory = await prisma.categories.create({
         data: {
-            name: categoryToCreate.name,
-            slug: categoryToCreate.name.toLowerCase().replace(/\s+/g, '-'),
+            name: sanitizedName,
+            slug: sanitizedName.toLowerCase().replace(/\s+/g, '-'),
         }
     });
 
@@ -74,6 +77,8 @@ export async function changeCategory(slug: string, name: string) {
  * @returns Eyðir flokki úr gagnagrunni
  */
 export async function deleteCategory(slug: string): Promise<boolean> {
+
+
     const category = await prisma.categories.findFirst({
         where: { slug }
     });
