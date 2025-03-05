@@ -13,9 +13,7 @@ http://localhost:3000
 ```
 
 ***Opinbert***
-```
-https://hbv403g-v3.onrender.com
-```
+[https://hbv403g-v3.onrender.com](https://hbv403g-v3.onrender.com)
 
 ## Slóðir
 
