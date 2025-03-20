@@ -2,7 +2,7 @@ import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { getCategories, getCategorySlug, createCategory, changeCategory, deleteCategory, validateCategory } from './categories.db.js';
 import { getQuestions, getQuestionsByCategory, deleteQuestion, createQuestion, validateQuestion } from './questions.db.js';
-import { getAnswers, getAnswersByCategory } from './answers.db.js';
+import { getAnswers, getAnswersByCategory, createAnswer, validateAnswer } from './answers.db.js';
 import { cors } from 'hono/cors'
 
 const app = new Hono();
@@ -156,6 +156,34 @@ app.get('/categories/:slug/answers', async (c) => {
     return c.json(answers);
   } catch (error) {
     console.error("Villa kom upp:", error);
+    return c.json({ error: "Villa í gagnagrunni" }, 500);
+  }
+});
+
+app.post('/questions/:id/answer', async (c) => {
+  try {
+    const { id } = c.req.param();
+    const body = await c.req.json();
+
+    const questionId = Number(id);
+    if (isNaN(questionId) || questionId < 1) {
+      return c.json({ error: "Ógilt spurningar ID" }, 400);
+    }
+
+    const validation = validateAnswer(body);
+    if (!validation.success) {
+      return c.json({ error: "Ógild gögn", errors: validation.error.flatten() }, 400);
+    }
+
+    const newAnswer = await createAnswer(questionId, validation.data.text, validation.data.correct);
+
+    if (!newAnswer) {
+      return c.json({ error: "Spurning fannst ekki" }, 404);
+    }
+
+    return c.json(newAnswer, 201);
+  } catch (e) {
+    console.error("Villa kom upp:", e);
     return c.json({ error: "Villa í gagnagrunni" }, 500);
   }
 });
