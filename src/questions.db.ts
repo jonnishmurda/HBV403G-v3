@@ -19,6 +19,7 @@ export async function getQuestions() {
     return await prisma.question.findMany({
         include: {
             category: true,
+            answers: true,
         },
     });
 }
@@ -31,13 +32,28 @@ export async function getQuestions() {
 export async function getQuestionsByCategory(slug: string) {
     const category = await prisma.categories.findUnique({
         where: { slug },
-        include: { questions: true },
+        include: {
+            questions: {
+                include: {
+                    answers: true,
+                },
+            },
+        },
     });
 
     if (!category) return [];
 
-    return category.questions;
+    return category.questions.map((question) => ({
+        id: question.id,
+        text: question.text,
+        answers: question.answers.map((answer) => ({
+            id: answer.id,
+            text: answer.text,
+            correct: answer.correct,
+        })),
+    }));
 }
+
 
 /**
  * 

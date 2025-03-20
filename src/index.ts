@@ -143,6 +143,24 @@ app.delete('/questions/:id', async (c) => {
 });
 
 
+app.get('/categories/:slug/answers', async (c) => {
+  try {
+    const { slug } = c.req.param();
+    const answers = await getAnswersByCategory(slug);
+
+    if (!answers || answers.length === 0) {
+      return c.json({ error: "Engin svör fundust fyrir þennan flokk" }, 404);
+    }
+
+    return c.json(answers);
+  } catch (error) {
+    console.error("Villa kom upp:", error);
+    return c.json({ error: "Villa í gagnagrunni" }, 500);
+  }
+});
+
+
+
 serve({
   fetch: app.fetch,
   port: 3000
