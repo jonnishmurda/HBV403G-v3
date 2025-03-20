@@ -7,8 +7,9 @@ const prisma = new PrismaClient();
 
 export const QuestionSchema = z.object({
     text: z.string().min(5, "Spurning verður að hafa að minnsta kosti 5 stafi").max(1024, "Spurning má hafa að mesta lagi 1024 stafir"),
-    categorySlug: z.string()
-})
+    categorySlug: z.string().optional()
+});
+
 
 
 /**
@@ -62,21 +63,32 @@ export async function getQuestionsByCategory(slug: string) {
  * @returns Bætir við spurningu í viðeigandi flokk
  */
 export async function createQuestion(categorySlug: string, text: string) {
+    console.log("🔎 Looking for category:", categorySlug);
+
     const category = await prisma.categories.findUnique({
         where: { slug: categorySlug },
     });
 
-    if (!category) return null;
+    if (!category) {
+        console.error("❌ Category not found:", categorySlug);
+        return null;
+    }
 
-    const sanitizedText = xss(text)
+    console.log("✅ Category found:", category.id, category.name);
 
-    return await prisma.question.create({
+    const sanitizedText = xss(text);
+
+    const newQuestion = await prisma.question.create({
         data: {
             text: sanitizedText,
             categoryId: category.id,
         },
     });
+
+    console.log("✅ New Question Created:", newQuestion);
+    return newQuestion;
 }
+
 
 /**
  * 

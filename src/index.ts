@@ -106,25 +106,30 @@ app.post('/categories/:slug/question', async (c) => {
     const { slug } = c.req.param();
     const body = await c.req.json();
 
+    console.log("📥 Received request to create question:", body);
+
     const validation = validateQuestion({ ...body, categorySlug: slug });
 
     if (!validation.success) {
+      console.error("❌ Validation failed:", validation.error.flatten());
       return c.json({ error: "Ógild gögn", errors: validation.error.flatten() }, 400);
     }
-
 
     const newQuestion = await createQuestion(slug, validation.data.text);
 
     if (!newQuestion) {
+      console.error("❌ Category not found:", slug);
       return c.json({ error: "Flokkur fannst ekki" }, 404);
     }
 
+    console.log("✅ Question created:", newQuestion);
     return c.json(newQuestion, 201);
   } catch (e) {
-    console.error("Villa kom upp:", e);
+    console.error("❌ Error in /categories/:slug/question:", e);
     return c.json({ error: "Villa í gagnagrunni" }, 500);
   }
-})
+});
+
 
 app.delete('/questions/:id', async (c) => {
   const { id } = c.req.param();
@@ -192,7 +197,7 @@ app.post('/questions/:id/answer', async (c) => {
 
 serve({
   fetch: app.fetch,
-  port: 3000
+  port: 5000
 }, (info) => {
   console.log(`Server is running on http://localhost:${info.port}`)
 });
