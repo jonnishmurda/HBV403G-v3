@@ -2,7 +2,7 @@ import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { getCategories, getCategorySlug, createCategory, changeCategory, deleteCategory, validateCategory } from './categories.db.js';
 import { getQuestions, getQuestionsByCategory, deleteQuestion, createQuestion, validateQuestion } from './questions.db.js';
-import { getAnswers } from './answers.db.js';
+import { getAnswers, getAnswersByCategory } from './answers.db.js';
 import { cors } from 'hono/cors'
 
 const app = new Hono();
